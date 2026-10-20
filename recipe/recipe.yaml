@@ -1,0 +1,56 @@
+schema_version: 1
+
+context:
+  version: "0.3.5"
+
+package:
+  name: soapysdr-module-hackrf
+  version: ${{ version }}
+
+source:
+  url: https://github.com/pothosware/SoapyHackRF/archive/soapy-hackrf-${{ version }}.tar.gz
+  sha256: 0ef13ac8cf1ec0c0728bdfe8a775e38fd06574418948e3a30ea6794de5d5a06c
+
+build:
+  number: 1
+
+requirements:
+  build:
+    - ${{ compiler("cxx") }}
+    - ${{ stdlib("c") }}
+    - cmake
+    - ninja
+    - pkg-config
+  host:
+    - libhackrf
+    - soapysdr
+  run_exports:
+    - ${{ pin_subpackage("soapysdr-module-hackrf", upper_bound="x.x") }}
+
+tests:
+  - package_contents:
+      strict: true
+      files:
+        - if: not win
+          then: lib/SoapySDR/modules${{ soapysdr }}/libHackRFSupport.so
+          else: Library/lib/SoapySDR/modules${{ soapysdr }}/HackRFSupport.dll
+  - script:
+      - SoapySDRUtil --info
+      - if: not win
+        then: SoapySDRUtil --info | grep HackRFSupport
+        else: SoapySDRUtil --info | findstr /l HackRFSupport
+
+about:
+  license: MIT
+  license_file: LICENSE
+  summary: SoapySDR HackRF Support Module
+  description: |
+    The Soapy HackRF project provides a plugin module to use HackRF radio
+    devices within the SoapySDR API and software that supports SoapySDR.
+  homepage: https://github.com/pothosware/SoapyHackRF/wiki
+  repository: https://github.com/pothosware/SoapyHackRF
+  documentation: https://github.com/pothosware/SoapyHackRF/wiki
+
+extra:
+  recipe-maintainers:
+    - ryanvolz
